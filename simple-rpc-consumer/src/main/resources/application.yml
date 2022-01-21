@@ -1,0 +1,17 @@
+server:
+  port: 8081
+
+basis:
+  simple:
+    rpc:
+      simple-rpc-server-port: 8888
+      max-wait-time: 5
+
+
+spring:
+  application:
+    name: simple-rpc-consumer
+
+nacos:
+  discovery:
+    server-addr: 106.14.245.26:8848

@@ -1,0 +1,16 @@
+server:
+  port: 9091
+
+basis:
+  simple:
+    rpc:
+      simple-rpc-server-port: 9999
+      max-wait-time: 5
+
+spring:
+  application:
+    name: simple-rpc-provider
+
+nacos:
+  discovery:
+    server-addr: 106.14.245.26:8848
