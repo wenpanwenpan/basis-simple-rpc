@@ -14,4 +14,4 @@ spring:
 
 nacos:
   discovery:
-    server-addr: 106.14.245.26:8848
+    server-addr: wenpan-host:8848

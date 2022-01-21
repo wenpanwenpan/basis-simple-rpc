@@ -17,6 +17,8 @@ import org.simple.rpc.starter.annotation.SimpleRpcClient;
 import org.simple.rpc.starter.client.SequenceIdGenerator;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.constant.SimpleRpcConstants;
+import org.simple.rpc.starter.exception.NoInstancesAvailableException;
+import org.simple.rpc.starter.exception.SimpleRpcCallFailedException;
 import org.simple.rpc.starter.exception.SimpleRpcChannelException;
 import org.simple.rpc.starter.helper.ApplicationContextHelper;
 import org.simple.rpc.starter.message.RpcRequestMessage;
@@ -52,10 +54,7 @@ public class ClientProxyCreateFactory {
         // 获取到该接口所有的interface
         Class<?>[] interfaces = {serviceClass};
         SimpleRpcClient simpleRpcClient = serviceClass.getAnnotation(SimpleRpcClient.class);
-        String name = StringUtils.isBlank(simpleRpcClient.name()) ? simpleRpcClient.value() : simpleRpcClient.name();
-        if (StringUtils.isBlank(name)) {
-            throw new RuntimeException("@SimpleRpcClient value and name is null, please check.");
-        }
+        String providerName = StringUtils.isBlank(simpleRpcClient.name()) ? simpleRpcClient.value() : simpleRpcClient.name();
 
         // jdk代理必须的handler，代理对象的方法执行就会调用这里的invoke方法。自动传入调用的方法 + 方法参数
         InvocationHandler invocationHandler = new InvocationHandler() {
@@ -72,11 +71,12 @@ public class ClientProxyCreateFactory {
                         args);
 
                 // 2、将消息对象发送出去
-                getChannelByProviderName(name).writeAndFlush(rpcRequestMessage);
+                Channel channel = getChannelByProviderName(providerName);
+                channel.writeAndFlush(rpcRequestMessage);
 
                 // 3、准备一个空的promise对象来接收server返回的结果
                 // 指定promise对象异步接收结果的线程，这里使用发送消息的channel的线程来接收消息（getChannel().eventLoop()）
-                DefaultPromise<Object> promise = new DefaultPromise<>(getChannelByProviderName(name).eventLoop());
+                DefaultPromise<Object> promise = new DefaultPromise<>(channel.eventLoop());
 
                 // 将这个promise缓存起来，以便于server响应结果回来的时候能够通过消息的sequenceId正确的找到这个promise
                 // 那么这个promise在哪里接收的结果呢？当然是在响应handler里，因为只有当server端响应了promise才应该被设置值
@@ -89,15 +89,15 @@ public class ClientProxyCreateFactory {
 
                 // 调用接口的线程等待，直到promise有结果（正常或异常）
                 SimpleRpcProperties simpleRpcProperties = ApplicationContextHelper.getContext().getBean(SimpleRpcProperties.class);
-                System.out.println("getMaxWaitTime = " + simpleRpcProperties.getMaxWaitTime());
-                promise.await(simpleRpcProperties.getMaxWaitTime());
-                System.out.println("promise结果已返回");
+                promise.await(simpleRpcProperties.getMaxWaitTime() * 1000);
 
+                System.out.println("promise结果已返回, promise = " + promise.toString());
                 // server返回结果后结束上面的阻塞，执行这里
                 if (promise.isSuccess()) {
                     return promise.getNow();
                 } else {
-                    throw new RuntimeException(promise.cause());
+                    throw new SimpleRpcCallFailedException(String.format(
+                            "simple rpc call failed, interface providerName is : [%s]", serviceClass.getName()), promise.cause());
                 }
             }
         };
@@ -109,10 +109,6 @@ public class ClientProxyCreateFactory {
     }
 
     /**
-     * 发送数据的channel
-     */
-    private static Channel channel = null;
-    /**
      * 同步锁对象
      */
     private static final Object LOCK = new Object();
@@ -120,28 +116,13 @@ public class ClientProxyCreateFactory {
     /**
      * 获取唯一的 channel 对象(需要通过这个channel将数据发送给server端)
      */
-    public static Channel getChannel() {
-        if (channel != null) {
-            return channel;
-        }
-        // 双重检查
-        synchronized (LOCK) {
-            if (channel != null) {
-                return channel;
-            }
-            initChannel();
-            return channel;
-        }
-    }
-
-    /**
-     * 获取唯一的 channel 对象(需要通过这个channel将数据发送给server端)
-     */
     public static Channel getChannelByProviderName(@NonNull String providerName) throws NacosException {
-
         // 从nacos上随机获取一个可用的服务提供者实例
         NacosRegistrarManager nacosRegistrarManager = ApplicationContextHelper.getContext().getBean(NacosRegistrarManager.class);
         Instance instance = nacosRegistrarManager.getRandomInstanceByServerName(providerName);
+        if (Objects.isNull(instance)) {
+            throw new NoInstancesAvailableException(String.format("can not found available instance by service name [%s]", providerName));
+        }
         // [服务名 + ip + 端口] 确定provider的唯一性
         String ip = instance.getIp();
         int port = instance.getPort();
@@ -226,51 +207,4 @@ public class ClientProxyCreateFactory {
         }
     }
 
-    /**
-     * 初始化 channel
-     */
-    private static void initChannel() {
-        // 客户端事件线程池组
-        NioEventLoopGroup group = new NioEventLoopGroup();
-        // 日志处理handler
-        LoggingHandler loggingHandler = new LoggingHandler(LogLevel.DEBUG);
-        // 自定义编码解码器
-        MessageCodecSharable messageCodec = new MessageCodecSharable();
-        // rpc调用响应消息处理handler
-        RpcResponseMessageHandler rpcHandler = new RpcResponseMessageHandler();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.group(group);
-
-        // 绑定handler
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-            // 建立连接后为该client channel添加handler
-            @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-                // 自定义帧解码器
-                ch.pipeline().addLast(new ProtocolFrameDecoder());
-                // 日志处理器
-                // ch.pipeline().addLast(loggingHandler);
-                // 自定义编码解码器（按自定义格式将消息解码，然后传递给下一个handler）
-                ch.pipeline().addLast(messageCodec);
-                // rpc 调用响应消息处理handler
-                ch.pipeline().addLast(rpcHandler);
-            }
-        });
-
-        try {
-            // 这里先默认provider端监听的是本地的9999端口（同步等待）
-            channel = bootstrap.connect("localhost", 9999).sync().channel();
-            // channel关闭时监听，优雅的关闭NioEventLoopGroup
-            channel.closeFuture().addListener(future -> {
-                System.out.println("channel = " + channel);
-                // help gc and reconnect
-                channel = null;
-                group.shutdownGracefully();
-                log.warn("server channel shutdown, shutdown [NioEventLoopGroup] gracefully now.");
-            });
-        } catch (Exception e) {
-            log.error("client error", e);
-        }
-    }
 }

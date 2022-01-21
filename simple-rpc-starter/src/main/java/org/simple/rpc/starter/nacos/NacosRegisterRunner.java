@@ -29,11 +29,6 @@ public class NacosRegisterRunner implements CommandLineRunner {
 
     private NacosRegistrarManager nacosRegistrarManager;
 
-    /**
-     * whether the container has been initialized
-     */
-    private volatile boolean initialized = false;
-
     public NacosRegisterRunner(SpringParamsProperties springParamsProperties,
                                SimpleRpcProperties simpleRpcProperties,
                                NacosRegistrarManager nacosRegistrarManager) {

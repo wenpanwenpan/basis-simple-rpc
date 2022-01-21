@@ -6,23 +6,28 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import org.apache.commons.lang3.StringUtils;
+import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
+import org.simple.rpc.starter.config.properties.SpringParamsProperties;
+import org.simple.rpc.starter.util.NetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.NonNull;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * nacos注册管理器(保证容器启动好后才能被主动使用)
+ * nacos注册管理器(提供服务注册到nacos相关API)
  *
  * @author Mr_wenpan@163.com 2022/01/20 18:08
  */
-public class NacosRegistrarManager {
+public final class NacosRegistrarManager implements DisposableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(NacosRegistrarManager.class);
 
@@ -37,22 +42,36 @@ public class NacosRegistrarManager {
     private final NamingService namingService;
 
     /**
-     * nacos服务发现Properties
-     */
-    private NacosDiscoveryProperties nacosDiscoveryProperties;
-
-    /**
      * 随机
      */
     private static final Random RANDOM = new Random();
 
     /**
-     * 存放注册到nacos的所有服务名集合
+     * simple rpc 配置
      */
-    private static final ConcurrentHashMap<String, InetSocketAddress> SERVICE_REGISTER_MAP = new ConcurrentHashMap<>();
+    private SimpleRpcProperties simpleRpcProperties;
 
-    public NacosRegistrarManager(NacosDiscoveryProperties nacosDiscoveryProperties) {
+    /**
+     * spring相关参数配置
+     */
+    private SpringParamsProperties springParamsProperties;
+
+    /**
+     * nacos服务发现Properties
+     */
+    private NacosDiscoveryProperties nacosDiscoveryProperties;
+
+    /**
+     * 是否初始化
+     */
+    private final AtomicBoolean namingServiceInitFlag = new AtomicBoolean(Boolean.FALSE);
+
+    public NacosRegistrarManager(SimpleRpcProperties simpleRpcProperties,
+                                 SpringParamsProperties springParamsProperties,
+                                 NacosDiscoveryProperties nacosDiscoveryProperties) {
         this.nacosDiscoveryProperties = nacosDiscoveryProperties;
+        this.springParamsProperties = springParamsProperties;
+        this.simpleRpcProperties = simpleRpcProperties;
         namingService = getNacosNamingService();
     }
 
@@ -62,6 +81,9 @@ public class NacosRegistrarManager {
      * @return com.alibaba.nacos.api.naming.NamingService
      */
     private NamingService getNacosNamingService() {
+        if (!namingServiceInitFlag.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+            throw new RuntimeException("namingService has been init.");
+        }
         try {
             return NacosFactory.createNamingService(nacosDiscoveryProperties.getServerAddr());
         } catch (NacosException e) {
@@ -82,8 +104,6 @@ public class NacosRegistrarManager {
         }
         // 注册到nacos
         namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
-        // 注册到本地缓存
-        SERVICE_REGISTER_MAP.put(serverName, address);
     }
 
     /**
@@ -130,20 +150,29 @@ public class NacosRegistrarManager {
 
     /**
      * 根据serverName注销服务
+     *
+     * @param serverName serverName
+     * @author Mr_wenpan@163.com 2022/1/21 2:46 下午
      */
     public void clearRegister(@NonNull String serverName) throws NacosException {
-        if (StringUtils.isBlank(serverName)
-                || SERVICE_REGISTER_MAP.isEmpty()
-                || Objects.isNull(SERVICE_REGISTER_MAP.get(serverName))) {
+        if (StringUtils.isBlank(serverName)) {
             return;
         }
-        InetSocketAddress inetSocketAddress = SERVICE_REGISTER_MAP.get(serverName);
-        String host = inetSocketAddress.getHostName();
-        int port = inetSocketAddress.getPort();
-        // 从nacos上注销
-        namingService.deregisterInstance(serverName, host, port);
-        // 从本地缓存注销
-        SERVICE_REGISTER_MAP.remove(serverName);
+        serverName = PREFIX + serverName;
+        // 从nacos上注销该实例（这里仅仅会从nacos上注销serverName下的当前ip + 端口的实例）
+        try {
+            namingService.deregisterInstance(serverName, NetworkUtil.getCurrentHostIp(), simpleRpcProperties.getSimpleRpcServerPort());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException("logout from nacos failed.");
+        }
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        // 主动清除注册信息
+        logger.info("NacosRegistrarManager was destroyed, the registration information will be cleared from the registry");
+        clearRegister(springParamsProperties.getName());
+        namingServiceInitFlag.compareAndSet(Boolean.TRUE, Boolean.FALSE);
     }
 
 }

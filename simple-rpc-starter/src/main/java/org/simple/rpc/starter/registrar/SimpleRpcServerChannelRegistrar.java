@@ -23,10 +23,6 @@ public class SimpleRpcServerChannelRegistrar {
      * 保存provider端channel的map
      */
     private static final Map<String, Channel> CHANNEL_MAP = new ConcurrentHashMap<>();
-    /**
-     * 保存provider端channel的map(key和value与CHANNEL_MAP相反)
-     */
-    private static final Map<Channel, String> CHANNEL_MAP_BACK = new ConcurrentHashMap<>();
 
     /**
      * 获取channel by key
@@ -57,7 +53,6 @@ public class SimpleRpcServerChannelRegistrar {
             throw new SimpleRpcChannelException(String.format("[%s] has existed in channelMap, can not register.", key));
         }
         CHANNEL_MAP.put(key, channel);
-        CHANNEL_MAP_BACK.put(channel, key);
         return true;
     }
 
@@ -72,27 +67,11 @@ public class SimpleRpcServerChannelRegistrar {
             return;
         }
         Channel channel = CHANNEL_MAP.get(key);
-        CHANNEL_MAP_BACK.remove(channel);
         CHANNEL_MAP.remove(key);
-    }
-
-    /**
-     * 根据channel移除本地缓存
-     *
-     * @param channel channel
-     * @author Mr_wenpan@163.com 2022/1/21 11:39 上午
-     */
-    public static void removeChannelByValue(Channel channel) {
-        String key = CHANNEL_MAP_BACK.get(channel);
-        CHANNEL_MAP.remove(key);
-        CHANNEL_MAP_BACK.remove(channel);
     }
 
     public static Map<String, Channel> getChannelMap() {
         return CHANNEL_MAP;
     }
 
-    public static Map<Channel, String> getChannelMapBack() {
-        return CHANNEL_MAP_BACK;
-    }
 }

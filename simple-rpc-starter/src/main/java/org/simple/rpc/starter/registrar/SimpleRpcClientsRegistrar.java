@@ -2,6 +2,7 @@ package org.simple.rpc.starter.registrar;
 
 import org.simple.rpc.starter.annotation.EnableSimpleRpcClients;
 import org.simple.rpc.starter.annotation.SimpleRpcClient;
+import org.simple.rpc.starter.exception.ProviderNameNullException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -133,6 +134,9 @@ public class SimpleRpcClientsRegistrar implements ImportBeanDefinitionRegistrar,
         BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(SimpleRpcClientFactoryBean.class);
         // 解析出@SimpleRpcClient注解的name
         String name = getName(attributes);
+        if (!StringUtils.hasText(name)) {
+            throw new ProviderNameNullException(String.format("class [%s] , @SimpleRpcClient name or value can not be null, please check.", className));
+        }
         definition.addPropertyValue("name", name);
         definition.addPropertyValue("type", className);
         definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
@@ -198,7 +202,6 @@ public class SimpleRpcClientsRegistrar implements ImportBeanDefinitionRegistrar,
                 url = name;
             }
             host = new URI(url).getHost();
-
         } catch (URISyntaxException e) {
             // do nothing
         }

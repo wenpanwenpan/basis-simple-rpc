@@ -5,7 +5,7 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 
 /**
- * rpc客户端注解
+ * rpc客户端注解（使用时请保证value和name至少有一个不为空，优先使用name）
  *
  * @author Mr_wenpan@163.com 2022/01/19 14:08
  */

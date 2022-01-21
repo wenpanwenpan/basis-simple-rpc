@@ -37,7 +37,7 @@ public class RpcRequestMessage extends Message {
                              String interfaceName,
                              String methodName,
                              Class<?> returnType,
-                             Class[] parameterTypes,
+                             Class<?>[] parameterTypes,
                              Object[] parameterValue) {
         super.setSequenceId(sequenceId);
         this.interfaceName = interfaceName;
