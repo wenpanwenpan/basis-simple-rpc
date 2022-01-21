@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/basis-simple-rpc.iml" filepath="$PROJECT_DIR$/.idea/basis-simple-rpc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-rpc-consumer/simple-rpc-consumer.iml" filepath="$PROJECT_DIR$/simple-rpc-consumer/simple-rpc-consumer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-rpc-provider/simple-rpc-provider.iml" filepath="$PROJECT_DIR$/simple-rpc-provider/simple-rpc-provider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-rpc-starter/simple-rpc-starter.iml" filepath="$PROJECT_DIR$/simple-rpc-starter/simple-rpc-starter.iml" />
+    </modules>
+  </component>
+</project>
