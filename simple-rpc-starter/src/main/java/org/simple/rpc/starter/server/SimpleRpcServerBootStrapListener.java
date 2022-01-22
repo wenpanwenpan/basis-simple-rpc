@@ -27,7 +27,7 @@ public class SimpleRpcServerBootStrapListener implements ApplicationListener<Con
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleRpcServerBootStrapListener.class);
 
-    private SimpleRpcProperties simpleRpcProperties;
+    private final SimpleRpcProperties simpleRpcProperties;
 
     public SimpleRpcServerBootStrapListener(SimpleRpcProperties simpleRpcProperties) {
         this.simpleRpcProperties = simpleRpcProperties;

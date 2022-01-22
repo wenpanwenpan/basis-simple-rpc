@@ -3,3 +3,6 @@
 可支持多种序列化算法动态配置
 可支持多种调用模式（比如底层直接使用httpClient去调用或使用netty）
 必须要指定netty server端的启动监听端口
+
+
+@EnableSimpleRpcClients注解可通过value属性或basePackages指定要扫描的包(支持多个包扫描)，如果不指定则默认扫描当前classpath下
