@@ -12,9 +12,10 @@ import org.springframework.stereotype.Service;
 public class HelloSimpleRpcImpl implements HelloSimpleRpc {
 
     @Override
-    public void sayHello(String name) {
+    public String sayHello(String name) {
         System.out.println("hello " + name);
         System.out.println("=================>>>>>>>>>>>我是服务提供端的HelloSimpleRpcImpl.");
+        return "success-" + name;
     }
 
 }

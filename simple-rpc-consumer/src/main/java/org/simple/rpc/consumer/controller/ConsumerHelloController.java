@@ -30,8 +30,9 @@ public class ConsumerHelloController {
     @GetMapping
     public ResponseEntity<String> sayHello(String name) {
         // 这里像调用本地方法一样远程调用
-        helloSimpleRpc.sayHello(name);
-        return ResponseEntity.ok("success");
+        String str = helloSimpleRpc.sayHello(name);
+        System.out.println("rpc 调用返回 str = " + str);
+        return ResponseEntity.ok(str);
     }
 
 }

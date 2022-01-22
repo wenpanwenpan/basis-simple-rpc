@@ -155,7 +155,7 @@ public class ClientProxyCreateFactory {
             return channel;
         }
         synchronized (LOCK) {
-            // 随机获取一个可用实例
+            // 通过uniqueKey获取到某个provider的channel
             channel = SimpleRpcServerChannelRegistrar.getChannel(uniqueKey);
             if (Objects.nonNull(channel)) {
                 return channel;

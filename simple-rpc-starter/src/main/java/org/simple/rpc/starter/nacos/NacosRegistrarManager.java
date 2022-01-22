@@ -49,17 +49,17 @@ public final class NacosRegistrarManager implements DisposableBean {
     /**
      * simple rpc 配置
      */
-    private SimpleRpcProperties simpleRpcProperties;
+    private final SimpleRpcProperties simpleRpcProperties;
 
     /**
      * spring相关参数配置
      */
-    private SpringParamsProperties springParamsProperties;
+    private final SpringParamsProperties springParamsProperties;
 
     /**
      * nacos服务发现Properties
      */
-    private NacosDiscoveryProperties nacosDiscoveryProperties;
+    private final NacosDiscoveryProperties nacosDiscoveryProperties;
 
     /**
      * 是否初始化
@@ -103,7 +103,9 @@ public final class NacosRegistrarManager implements DisposableBean {
             return;
         }
         // 注册到nacos
-        namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
+//        namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
+        namingService.registerInstance(PREFIX + serverName, simpleRpcProperties.getNacos().getGroupName(),
+                address.getHostName(), address.getPort(), simpleRpcProperties.getNacos().getClusterName());
     }
 
     /**

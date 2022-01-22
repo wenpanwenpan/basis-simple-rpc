@@ -6,6 +6,9 @@ basis:
     rpc:
       simple-rpc-server-port: 8888
       max-wait-time: 5
+      nacos:
+        group-name: consumer-group
+        cluster-name: consumer-cluster
 
 
 spring:

@@ -11,6 +11,7 @@ public interface HelloSimpleRpc {
      * sayHello方法
      *
      * @param name name
+     * @return String
      */
-    void sayHello(String name);
+    String sayHello(String name);
 }

@@ -13,6 +13,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SimpleRpcProperties {
 
     public static final String PREFIX = "basis.simple.rpc";
+    public static final String DEFAULT_GROUP = "DEFAULT-GROUP";
+    public static final String DEFAULT_CLUSTER = "DEFAULT-CLUSTER";
 
     /**
      * rpc server监听的端口
@@ -24,17 +26,37 @@ public class SimpleRpcProperties {
      */
     private Integer maxWaitTime = 60;
 
+    /**
+     * nacos相关配置
+     */
     private Nacos nacos = new Nacos();
 
     public static class Nacos {
+
+        /**
+         * 组名称
+         */
+        private String groupName;
+
+        /**
+         * 集群名称
+         */
+        private String clusterName;
+
         /**
          * 注册中心IP地址
          */
         private String registryServerIp;
+
         /**
          * 注册中心IP端口
          */
         private Integer registryServerPort;
+
+        public Nacos() {
+            groupName = DEFAULT_GROUP;
+            clusterName = DEFAULT_CLUSTER;
+        }
 
         public String getRegistryServerIp() {
             return registryServerIp;
@@ -50,6 +72,22 @@ public class SimpleRpcProperties {
 
         public void setRegistryServerPort(Integer registryServerPort) {
             this.registryServerPort = registryServerPort;
+        }
+
+        public String getGroupName() {
+            return groupName;
+        }
+
+        public void setGroupName(String groupName) {
+            this.groupName = groupName;
+        }
+
+        public String getClusterName() {
+            return clusterName;
+        }
+
+        public void setClusterName(String clusterName) {
+            this.clusterName = clusterName;
         }
     }
 

@@ -23,11 +23,11 @@ public class NacosRegisterRunner implements CommandLineRunner {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SpringParamsProperties springParamsProperties;
+    private final SpringParamsProperties springParamsProperties;
 
-    private SimpleRpcProperties simpleRpcProperties;
+    private final SimpleRpcProperties simpleRpcProperties;
 
-    private NacosRegistrarManager nacosRegistrarManager;
+    private final NacosRegistrarManager nacosRegistrarManager;
 
     public NacosRegisterRunner(SpringParamsProperties springParamsProperties,
                                SimpleRpcProperties simpleRpcProperties,

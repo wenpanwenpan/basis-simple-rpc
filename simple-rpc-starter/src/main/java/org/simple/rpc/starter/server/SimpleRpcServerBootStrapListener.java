@@ -51,6 +51,7 @@ public class SimpleRpcServerBootStrapListener implements ApplicationListener<Con
         NioEventLoopGroup worker = new NioEventLoopGroup();
 
         try {
+            // 日志处理器
             LoggingHandler loggingHandler = new LoggingHandler(LogLevel.INFO);
             // 自定义协议解码器
             MessageCodecSharable messageCodecSharable = new MessageCodecSharable();
@@ -87,7 +88,6 @@ public class SimpleRpcServerBootStrapListener implements ApplicationListener<Con
                 boss.shutdownGracefully();
                 worker.shutdownGracefully();
             });
-            logger.info("simple rpc server channel.closeFuture().sync() execute.");
         } catch (Exception ex) {
             // 抛出异常中断容器启动
             throw new RuntimeException("setup simple rpc server occur exception.", ex);
