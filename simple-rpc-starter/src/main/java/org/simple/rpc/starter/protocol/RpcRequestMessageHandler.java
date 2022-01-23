@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * rpc请求处理器(入站handler)
@@ -22,6 +23,11 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
     private static final Logger logger = LoggerFactory.getLogger(RpcRequestMessageHandler.class);
 
     private ApplicationContext applicationContext;
+
+    /**
+     * rpcRequestMessage消息处理线程池
+     */
+    private ThreadPoolExecutor threadPoolExecutor;
 
     public RpcRequestMessageHandler(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -41,6 +47,7 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
         // 保证响应消息的序列号和请求消息的序列号一致
         responseMessage.setSequenceId(message.getSequenceId());
 
+        // todo 利用线程池来提升消息rpc请求消息接收、处理性能
         try {
             // 通过请求消息中的接口名称获取到容器中该接口的对应实现类
             String interfaceName = message.getInterfaceName();

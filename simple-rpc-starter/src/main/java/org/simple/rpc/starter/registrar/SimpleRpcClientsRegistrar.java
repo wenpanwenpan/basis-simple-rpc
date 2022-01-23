@@ -131,17 +131,17 @@ public class SimpleRpcClientsRegistrar implements ImportBeanDefinitionRegistrar,
                                          Map<String, Object> attributes) {
         // 类名（接口全限定名）
         String className = annotationMetadata.getClassName();
-        BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(SimpleRpcClientFactoryBean.class);
+        BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SimpleRpcClientFactoryBean.class);
         // 解析出@SimpleRpcClient注解的name
         String name = getName(attributes);
         if (!StringUtils.hasText(name)) {
             throw new ProviderNameNullException(String.format("class [%s] , @SimpleRpcClient name or value can not be null, please check.", className));
         }
-        definition.addPropertyValue("name", name);
-        definition.addPropertyValue("type", className);
-        definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        definitionBuilder.addPropertyValue("name", name);
+        definitionBuilder.addPropertyValue("type", className);
+        definitionBuilder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
         String alias = name + "SimpleRpcClient";
-        AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
+        AbstractBeanDefinition beanDefinition = definitionBuilder.getBeanDefinition();
 
         // has a default, won't be null
         // 设置主要的注入的对象

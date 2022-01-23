@@ -5,7 +5,7 @@ basis:
   simple:
     rpc:
       simple-rpc-server-port: 9999
-      max-wait-time: 5
+      max-wait-time: 15
       nacos:
         group-name: provider-group
         cluster-name: provider-cluster

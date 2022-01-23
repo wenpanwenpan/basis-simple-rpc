@@ -5,7 +5,7 @@ basis:
   simple:
     rpc:
       simple-rpc-server-port: 8888
-      max-wait-time: 5
+      max-wait-time: 15
       nacos:
         group-name: consumer-group
         cluster-name: consumer-cluster

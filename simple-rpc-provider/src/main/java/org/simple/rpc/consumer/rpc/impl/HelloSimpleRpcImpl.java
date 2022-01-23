@@ -3,6 +3,8 @@ package org.simple.rpc.consumer.rpc.impl;
 import org.simple.rpc.consumer.rpc.HelloSimpleRpc;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * HelloSimpleRpc实现
  *
@@ -15,6 +17,12 @@ public class HelloSimpleRpcImpl implements HelloSimpleRpc {
     public String sayHello(String name) {
         System.out.println("hello " + name);
         System.out.println("=================>>>>>>>>>>>我是服务提供端的HelloSimpleRpcImpl.");
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
         return "success-" + name;
     }
 

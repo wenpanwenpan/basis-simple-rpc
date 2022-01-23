@@ -8,11 +8,14 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import org.apache.commons.lang3.StringUtils;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.config.properties.SpringParamsProperties;
+import org.simple.rpc.starter.constant.SimpleRpcConstants;
+import org.simple.rpc.starter.registrar.SimpleRpcServerChannelRegistrar;
 import org.simple.rpc.starter.util.NetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -34,7 +37,7 @@ public final class NacosRegistrarManager implements DisposableBean {
     /**
      * simple rpc服务端注册到注册中心的前缀，方便区分
      */
-    private static final String PREFIX = "simple-rpc-";
+    public static final String PREFIX = "simple-rpc-";
 
     /**
      * namingService
@@ -103,9 +106,9 @@ public final class NacosRegistrarManager implements DisposableBean {
             return;
         }
         // 注册到nacos
-//        namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
-        namingService.registerInstance(PREFIX + serverName, simpleRpcProperties.getNacos().getGroupName(),
-                address.getHostName(), address.getPort(), simpleRpcProperties.getNacos().getClusterName());
+        namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
+//        namingService.registerInstance(PREFIX + serverName, simpleRpcProperties.getNacos().getGroupName(),
+//                address.getHostName(), address.getPort(), simpleRpcProperties.getNacos().getClusterName());
     }
 
     /**
@@ -120,6 +123,9 @@ public final class NacosRegistrarManager implements DisposableBean {
         }
 
         return namingService.getAllInstances(PREFIX + serverName);
+//        return namingService.getAllInstances(PREFIX + serverName,
+//                simpleRpcProperties.getNacos().getGroupName(),
+//                Collections.singletonList(simpleRpcProperties.getNacos().getGroupName()));
     }
 
     /**
@@ -171,10 +177,24 @@ public final class NacosRegistrarManager implements DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        // 主动清除注册信息
         logger.info("NacosRegistrarManager was destroyed, the registration information will be cleared from the registry");
+        // todo 主动清除本地缓存的到provider端的通信channel
+        List<Instance> instances = getAllInstanceByServerName(springParamsProperties.getName());
+        if (!CollectionUtils.isEmpty(instances)) {
+            for (Instance instance : instances) {
+                SimpleRpcServerChannelRegistrar.removeChannel(buildUnionKeyByInstance(instance));
+            }
+        }
+        // 清除本实例在nacos上的注册信息
         clearRegister(springParamsProperties.getName());
         namingServiceInitFlag.compareAndSet(Boolean.TRUE, Boolean.FALSE);
+    }
+
+    private static String buildUnionKeyByInstance(Instance instance) {
+        if (Objects.isNull(instance)) {
+            return StringUtils.EMPTY;
+        }
+        return instance.getServiceName() + instance.getIp() + SimpleRpcConstants.Symbol.COLON + instance.getPort();
     }
 
 }

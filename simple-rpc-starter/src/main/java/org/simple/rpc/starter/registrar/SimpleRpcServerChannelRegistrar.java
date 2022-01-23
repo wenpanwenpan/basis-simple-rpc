@@ -66,7 +66,6 @@ public class SimpleRpcServerChannelRegistrar {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        Channel channel = CHANNEL_MAP.get(key);
         CHANNEL_MAP.remove(key);
     }
 

@@ -102,6 +102,7 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
 //        log.debug("==========>>>>>>>> {}, {}, {}, {}, {}", magicNum, version, messageType, sequenceId, length);
 //        log.debug("{}", message);
 
+        System.out.println("消息解码......end " + message);
         // 传递到下一个handler中（这里可以看到，传递到这个handler以后的消息就是经过解码的消息了，就不含消息长度、魔数等字段了）
         out.add(message);
     }

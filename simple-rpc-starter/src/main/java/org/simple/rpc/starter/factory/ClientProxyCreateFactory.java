@@ -70,9 +70,10 @@ public class ClientProxyCreateFactory {
                         method.getParameterTypes(),
                         args);
 
-                // 2、将消息对象发送出去
+                // 2、将消息对象发送出去(这里channel不会阻塞等待消息返回)
                 Channel channel = getChannelByProviderName(providerName);
                 channel.writeAndFlush(rpcRequestMessage);
+                System.out.println("channel.writeAndFlush(rpcRequestMessage);");
 
                 // 3、准备一个空的promise对象来接收server返回的结果
                 // 指定promise对象异步接收结果的线程，这里使用发送消息的channel的线程来接收消息（getChannel().eventLoop()）
