@@ -1,17 +1,19 @@
-package org.simple.rpc.consumer.rpc.impl;
+package org.simple.rpc.provider.service.rpc;
 
-import org.simple.rpc.consumer.rpc.HelloSimpleRpc;
+import org.simple.rpc.inf.service.HelloSimpleRpcService;
+import org.simple.rpc.starter.annotation.SimpleRpcServerExpose;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * HelloSimpleRpc实现
+ * HelloSimpleRpcService实现
  *
- * @author Mr_wenpan@163.com 2022/01/20 10:36
+ * @author Mr_wenpan@163.com 2022/1/24 10:47 上午
  */
+@SimpleRpcServerExpose
 @Service
-public class HelloSimpleRpcImpl implements HelloSimpleRpc {
+public class HelloSimpleRpcImpl implements HelloSimpleRpcService {
 
     @Override
     public String sayHello(String name) {

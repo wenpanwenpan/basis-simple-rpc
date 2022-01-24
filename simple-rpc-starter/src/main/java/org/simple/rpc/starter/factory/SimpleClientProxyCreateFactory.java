@@ -12,8 +12,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultPromise;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.simple.rpc.starter.annotation.SimpleRpcClient;
 import org.simple.rpc.starter.client.SequenceIdGenerator;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.constant.SimpleRpcConstants;
@@ -35,12 +33,12 @@ import java.lang.reflect.Proxy;
 import java.util.Objects;
 
 /**
- * 客户端代理创建工厂
+ * simple rpc 客户端动态代理创建工厂
  *
- * @author Mr_wenpan@163.com 2022/01/19 11:45
+ * @author Mr_wenpan@163.com 2022/01/24 13:08
  */
 @Slf4j
-public class ClientProxyCreateFactory {
+public class SimpleClientProxyCreateFactory {
 
     /**
      * 通过接口的class创建该接口的代理对象(这里直接基于JDK提供的创建动态代理的工具来创建代理对象)
@@ -48,13 +46,11 @@ public class ClientProxyCreateFactory {
      * @param serviceClass 接口的class
      * @return T 代理对象
      */
-    public static <T> T getProxyService(Class<T> serviceClass) {
+    public static <T> T createProxyService(Class<T> serviceClass) {
         // 该接口的Class对象是被那个类加载器加载的
         ClassLoader classLoader = serviceClass.getClassLoader();
-        // 获取到该接口所有的interface
+        // 获取到该接口所有的interface(这里先假设就只有一个接口)
         Class<?>[] interfaces = {serviceClass};
-        SimpleRpcClient simpleRpcClient = serviceClass.getAnnotation(SimpleRpcClient.class);
-        String providerName = StringUtils.isBlank(simpleRpcClient.name()) ? simpleRpcClient.value() : simpleRpcClient.name();
 
         // jdk代理必须的handler，代理对象的方法执行就会调用这里的invoke方法。自动传入调用的方法 + 方法参数
         InvocationHandler invocationHandler = new InvocationHandler() {
@@ -71,7 +67,7 @@ public class ClientProxyCreateFactory {
                         args);
 
                 // 2、将消息对象发送出去(这里channel不会阻塞等待消息返回)
-                Channel channel = getChannelByProviderName(providerName);
+                Channel channel = getChannelByProviderInfName(serviceClass.getName());
                 channel.writeAndFlush(rpcRequestMessage);
                 System.out.println("channel.writeAndFlush(rpcRequestMessage);");
 
@@ -117,12 +113,12 @@ public class ClientProxyCreateFactory {
     /**
      * 获取唯一的 channel 对象(需要通过这个channel将数据发送给server端)
      */
-    public static Channel getChannelByProviderName(@NonNull String providerName) throws NacosException {
+    public static Channel getChannelByProviderInfName(@NonNull String interfaceName) throws NacosException {
         // 从nacos上随机获取一个可用的服务提供者实例
         NacosRegistrarManager nacosRegistrarManager = ApplicationContextHelper.getContext().getBean(NacosRegistrarManager.class);
-        Instance instance = nacosRegistrarManager.getRandomInstanceByServerName(providerName);
+        Instance instance = nacosRegistrarManager.getRandomInstanceByServerName(interfaceName);
         if (Objects.isNull(instance)) {
-            throw new NoInstancesAvailableException(String.format("can not found available instance by service name [%s]", providerName));
+            throw new NoInstancesAvailableException(String.format("can not found available instance by service name [%s]", interfaceName));
         }
         // [服务名 + ip + 端口] 确定provider的唯一性
         String ip = instance.getIp();
@@ -207,5 +203,4 @@ public class ClientProxyCreateFactory {
             return channel;
         }
     }
-
 }

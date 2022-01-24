@@ -1,11 +1,11 @@
-package org.simple.rpc.consumer.rpc;
+package org.simple.rpc.inf.service;
 
 /**
  * 服务提供端测试
  *
  * @author Mr_wenpan@163.com 2022/1/20 10:35 上午
  */
-public interface HelloSimpleRpc {
+public interface HelloSimpleRpcService {
 
     /**
      * sayHello方法

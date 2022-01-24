@@ -3,7 +3,6 @@ package org.simple.rpc.starter.config;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.config.properties.SpringParamsProperties;
 import org.simple.rpc.starter.helper.ApplicationContextHelper;
-import org.simple.rpc.starter.server.SimpleRpcServerBootStrapListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,14 +24,6 @@ public class SimpleRpcAutoConfiguration {
     @Bean
     public ApplicationContextHelper applicationContextHelper() {
         return new ApplicationContextHelper();
-    }
-
-    /**
-     * 注入simple rpc server启动监听（启动netty server）
-     */
-    @Bean
-    public SimpleRpcServerBootStrapListener simpleRpcServerBootStrapListener(SimpleRpcProperties simpleRpcProperties) {
-        return new SimpleRpcServerBootStrapListener(simpleRpcProperties);
     }
 
 }

@@ -107,8 +107,6 @@ public final class NacosRegistrarManager implements DisposableBean {
         }
         // 注册到nacos
         namingService.registerInstance(PREFIX + serverName, address.getHostName(), address.getPort());
-//        namingService.registerInstance(PREFIX + serverName, simpleRpcProperties.getNacos().getGroupName(),
-//                address.getHostName(), address.getPort(), simpleRpcProperties.getNacos().getClusterName());
     }
 
     /**
@@ -123,9 +121,6 @@ public final class NacosRegistrarManager implements DisposableBean {
         }
 
         return namingService.getAllInstances(PREFIX + serverName);
-//        return namingService.getAllInstances(PREFIX + serverName,
-//                simpleRpcProperties.getNacos().getGroupName(),
-//                Collections.singletonList(simpleRpcProperties.getNacos().getGroupName()));
     }
 
     /**

@@ -1,8 +1,6 @@
 package org.simple.rpc.starter.annotation;
 
-import org.simple.rpc.starter.nacos.NacosRegisterRunner;
-import org.simple.rpc.starter.nacos.NacosRegistrarManager;
-import org.simple.rpc.starter.registrar.SimpleRpcClientsRegistrar;
+import org.simple.rpc.starter.config.EnableSimpleRpcAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -15,7 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({SimpleRpcClientsRegistrar.class, NacosRegisterRunner.class, NacosRegistrarManager.class})
+@Import({EnableSimpleRpcAutoConfiguration.class})
 public @interface EnableSimpleRpcClients {
 
     /**
