@@ -1,6 +1,7 @@
 package org.simple.rpc.starter.config.properties;
 
 import lombok.Data;
+import org.simple.rpc.starter.serialize.Serializer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -25,6 +26,11 @@ public class SimpleRpcProperties {
      * 一次请求最大的等待时间（如果到达等待时间后仍然没有收到响应结果，则直接抛出调用异常），单位秒
      */
     private Integer maxWaitTime = 60;
+
+    /**
+     * 数据传输时使用的序列化算法
+     */
+    private Serializer.Algorithm serializerAlgorithm = Serializer.Algorithm.Java;
 
     /**
      * nacos相关配置

@@ -38,7 +38,7 @@ import java.util.Objects;
  * @author Mr_wenpan@163.com 2022/01/24 13:08
  */
 @Slf4j
-public class SimpleClientProxyCreateFactory {
+public class SimpleRpcClientProxyCreateFactory {
 
     /**
      * 通过接口的class创建该接口的代理对象(这里直接基于JDK提供的创建动态代理的工具来创建代理对象)

@@ -1,4 +1,4 @@
-package org.simple.rpc.starter.protocol;
+package org.simple.rpc.starter.serialize;
 
 import com.google.gson.*;
 import org.simple.rpc.starter.exception.SimpleRpcDeserializeException;
@@ -7,6 +7,10 @@ import org.simple.rpc.starter.exception.SimpleRpcSerializeException;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 序列化
@@ -54,11 +58,11 @@ public interface Serializer {
              */
             @Override
             public <T> T deserialize(Class<T> clazz, byte[] bytes) {
-                try {
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                // auto close stream
+                try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
                     return (T) ois.readObject();
                 } catch (Exception e) {
-                    throw new SimpleRpcDeserializeException("deserialize message failed.", e);
+                    throw new SimpleRpcDeserializeException("serialize message failed.", e);
                 }
             }
 
@@ -71,8 +75,7 @@ public interface Serializer {
              */
             @Override
             public <T> byte[] serialize(T object) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                try {
+                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
                     ObjectOutputStream oos = new ObjectOutputStream(bos);
                     oos.writeObject(object);
                     return bos.toByteArray();
@@ -88,7 +91,7 @@ public interface Serializer {
         },
 
         /**
-         * 使用JSON序列化
+         * 使用JSON序列化（序列化对象时还有点问题，待优化）
          */
         Json {
             /**
@@ -113,7 +116,7 @@ public interface Serializer {
              */
             @Override
             public <T> byte[] serialize(T object) {
-                Gson gson = new GsonBuilder().registerTypeAdapter(Class.class, new Serializer.ClassCodec()).create();
+                Gson gson = new GsonBuilder().serializeNulls().registerTypeAdapter(Class.class, new Serializer.ClassCodec()).create();
                 String json = gson.toJson(object);
                 return json.getBytes(StandardCharsets.UTF_8);
             }
@@ -124,6 +127,24 @@ public interface Serializer {
             }
         };
 
+        /**
+         * 序列化算法缓存
+         */
+        private static final Map<Integer, Algorithm> ALGORITHM_MAP = Collections.synchronizedMap(new HashMap<>());
+
+        static {
+            for (Algorithm algorithm : EnumSet.allOf(Algorithm.class)) {
+                ALGORITHM_MAP.put(algorithm.order(), algorithm);
+            }
+        }
+
+        /**
+         * 通过order匹配对应的序列化算法
+         */
+        public static Algorithm match(int order) {
+
+            return ALGORITHM_MAP.get(order);
+        }
     }
 
     class ClassCodec implements JsonSerializer<Class<?>>, JsonDeserializer<Class<?>> {
@@ -135,7 +156,6 @@ public interface Serializer {
         public Class<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             try {
                 String str = json.getAsString();
-                System.out.println("=======>>>>>>str = " + str);
                 return Class.forName(str);
             } catch (ClassNotFoundException e) {
                 throw new JsonParseException(e);

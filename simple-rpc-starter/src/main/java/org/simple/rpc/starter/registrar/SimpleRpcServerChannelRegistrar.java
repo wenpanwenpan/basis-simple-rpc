@@ -57,7 +57,7 @@ public class SimpleRpcServerChannelRegistrar {
     }
 
     /**
-     * 移除一个注册的channel
+     * 移除一个注册的channel，并关闭该channel
      *
      * @param key key
      * @author Mr_wenpan@163.com 2022/1/21 11:03 上午
@@ -67,6 +67,28 @@ public class SimpleRpcServerChannelRegistrar {
             return;
         }
         CHANNEL_MAP.remove(key);
+        Channel channel = CHANNEL_MAP.get(key);
+        if (channel.isActive()) {
+            channel.close();
+        }
+    }
+
+    /**
+     * 关闭该服务建立的所有channel
+     *
+     * @author Mr_wenpan@163.com 2022/1/24 3:49 下午
+     */
+    public static void removeAllChannel() {
+        if (CHANNEL_MAP.isEmpty()) {
+            return;
+        }
+        CHANNEL_MAP.forEach((key, value) -> {
+            CHANNEL_MAP.remove(key);
+            Channel channel = CHANNEL_MAP.get(key);
+            if (channel.isActive()) {
+                channel.close();
+            }
+        });
     }
 
     public static Map<String, Channel> getChannelMap() {

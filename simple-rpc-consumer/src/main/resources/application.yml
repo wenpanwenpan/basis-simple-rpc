@@ -9,6 +9,7 @@ basis:
       nacos:
         group-name: consumer-group
         cluster-name: consumer-cluster
+      serializer-algorithm: java
 
 
 spring:

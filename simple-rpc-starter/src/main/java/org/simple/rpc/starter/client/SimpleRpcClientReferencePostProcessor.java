@@ -1,12 +1,13 @@
 package org.simple.rpc.starter.client;
 
 import org.simple.rpc.starter.annotation.SimpleRpcClientReference;
-import org.simple.rpc.starter.factory.SimpleClientProxyCreateFactory;
+import org.simple.rpc.starter.factory.SimpleRpcClientProxyCreateFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SimpleRpcClientReferencePostProcessor implements BeanPostProcessor {
 
-    private static final Map<String, Object> SIMPLE_RPC_REFERENCE_MAP = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Object> SIMPLE_RPC_REFERENCE_MAP = new ConcurrentHashMap<>();
 
     /**
      * bean初始化之前
@@ -41,13 +42,11 @@ public class SimpleRpcClientReferencePostProcessor implements BeanPostProcessor 
                 if (Objects.isNull(reference)) {
                     continue;
                 }
-                Assert.isTrue(field.getType().isInterface(), "@SimpleRpcClientReference can only be specified on interface");
                 // 创建代理对象
-                Object proxyService = SimpleClientProxyCreateFactory.createProxyService(field.getType());
-                // todo 动态代理对象做缓存
+                Object proxyService = getProxyService(field.getType());
                 // 反射设置属性值
                 field.setAccessible(true);
-                field.set(bean, proxyService);
+                ReflectionUtils.setField(field, bean, proxyService);
             }
         } catch (Exception e) {
             throw new BeanCreationException(beanName, e);
@@ -60,4 +59,33 @@ public class SimpleRpcClientReferencePostProcessor implements BeanPostProcessor 
 
         return bean;
     }
+
+    /**
+     * 获取代理对象，先从缓存中获取，如果本地缓存中没有则创建一个代理对象并返回
+     *
+     * @param type 类型
+     * @return java.lang.Object 代理对象
+     * @author Mr_wenpan@163.com 2022/1/24 4:05 下午
+     */
+    private static Object getProxyService(Class<?> type) {
+        Assert.isTrue(type.isInterface(), "@SimpleRpcClientReference can only be specified on interface");
+        // double check
+        Object target = SIMPLE_RPC_REFERENCE_MAP.get(type);
+
+        if (target != null) {
+            return target;
+        }
+
+        synchronized (SimpleRpcClientReferencePostProcessor.class) {
+            target = SIMPLE_RPC_REFERENCE_MAP.get(type);
+            if (target != null) {
+                return target;
+            }
+            target = SimpleRpcClientProxyCreateFactory.createProxyService(type);
+            SIMPLE_RPC_REFERENCE_MAP.put(type, target);
+            return target;
+        }
+
+    }
+
 }

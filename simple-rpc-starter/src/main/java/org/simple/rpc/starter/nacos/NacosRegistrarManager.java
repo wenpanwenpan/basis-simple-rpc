@@ -10,12 +10,12 @@ import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.config.properties.SpringParamsProperties;
 import org.simple.rpc.starter.constant.SimpleRpcConstants;
 import org.simple.rpc.starter.registrar.SimpleRpcServerChannelRegistrar;
+import org.simple.rpc.starter.server.SimpleRpcServerExposeRunner;
 import org.simple.rpc.starter.util.NetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.NonNull;
-import org.springframework.util.CollectionUtils;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -173,15 +173,16 @@ public final class NacosRegistrarManager implements DisposableBean {
     @Override
     public void destroy() throws Exception {
         logger.info("NacosRegistrarManager was destroyed, the registration information will be cleared from the registry");
-        // todo 主动清除本地缓存的到provider端的通信channel
-        List<Instance> instances = getAllInstanceByServerName(springParamsProperties.getName());
-        if (!CollectionUtils.isEmpty(instances)) {
-            for (Instance instance : instances) {
-                SimpleRpcServerChannelRegistrar.removeChannel(buildUnionKeyByInstance(instance));
+        // 主动清除本地缓存的到provider端的通信channel
+        SimpleRpcServerChannelRegistrar.removeAllChannel();
+        // 清除本实例在nacos上的所有接口注册信息
+        SimpleRpcServerExposeRunner.getInterfaceRegisterInfoSet().forEach(interfaceName -> {
+            try {
+                clearRegister(interfaceName);
+            } catch (NacosException e) {
+                logger.error("clear interface register info from nacos occur exception.", e);
             }
-        }
-        // 清除本实例在nacos上的注册信息
-        clearRegister(springParamsProperties.getName());
+        });
         namingServiceInitFlag.compareAndSet(Boolean.TRUE, Boolean.FALSE);
     }
 

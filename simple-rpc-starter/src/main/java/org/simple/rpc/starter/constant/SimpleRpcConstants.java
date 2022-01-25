@@ -12,6 +12,14 @@ public interface SimpleRpcConstants {
      */
     interface Symbol {
         /**
+         * 英文状态下的左括号
+         */
+        String LEFT_BRACKET = "(";
+        /**
+         * 英文状态下的右括号
+         */
+        String RIGHT_BRACKET = ")";
+        /**
          * 感叹号：!
          */
         String SIGH = "!";

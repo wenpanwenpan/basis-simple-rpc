@@ -10,7 +10,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class ProtocolFrameDecoder extends LengthFieldBasedFrameDecoder {
 
-    private static final int MAX_FRAME_LENGTH = 4096;
+    private static final int MAX_FRAME_LENGTH = 40960;
     private static final int LENGTH_FIELD_OFFSET = 12;
     private static final int LENGTH_FIELD_LENGTH = 4;
     private static final int LENGTH_ADJUSTMENT = 0;

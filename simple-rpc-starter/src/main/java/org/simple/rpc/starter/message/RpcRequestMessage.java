@@ -15,23 +15,23 @@ public class RpcRequestMessage extends Message {
     /**
      * 调用的接口全限定名，服务端根据它找到实现
      */
-    private final String interfaceName;
+    private String interfaceName;
     /**
      * 调用接口中的方法名
      */
-    private final String methodName;
+    private String methodName;
     /**
      * 方法返回类型
      */
-    private final Class<?> returnType;
+    private Class<?> returnType;
     /**
      * 方法参数类型数组
      */
-    private final Class<?>[] parameterTypes;
+    private Class<?>[] parameterTypes;
     /**
      * 方法参数值数组
      */
-    private final Object[] parameterValue;
+    private Object[] parameterValue;
 
     public RpcRequestMessage(int sequenceId,
                              String interfaceName,

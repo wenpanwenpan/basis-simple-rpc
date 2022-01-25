@@ -6,6 +6,7 @@ basis:
     rpc:
       simple-rpc-server-port: 9999
       max-wait-time: 15
+      serializer-algorithm: java
       nacos:
         group-name: provider-group
         cluster-name: provider-cluster

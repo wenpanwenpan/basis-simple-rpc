@@ -1,13 +1,13 @@
 package org.simple.rpc.starter.util;
 
-import org.simple.rpc.starter.protocol.Serializer;
+import org.simple.rpc.starter.serialize.Serializer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * property属性读取工具
+ * application.properties属性读取工具
  *
  * @author Mr_wenpan@163.com 2021/09/24 23:41
  */

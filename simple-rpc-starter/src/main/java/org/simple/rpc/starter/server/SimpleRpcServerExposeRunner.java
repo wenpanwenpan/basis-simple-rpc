@@ -89,4 +89,12 @@ public class SimpleRpcServerExposeRunner implements CommandLineRunner {
         }));
     }
 
+    /**
+     * 获取到该实例所有已经暴露的接口
+     */
+    public static Set<String> getInterfaceRegisterInfoSet() {
+
+        return INTERFACE_REGISTER_INFO_SET;
+    }
+
 }

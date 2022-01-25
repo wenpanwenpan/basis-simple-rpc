@@ -6,7 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 import lombok.extern.slf4j.Slf4j;
 import org.simple.rpc.starter.message.Message;
-import org.simple.rpc.starter.util.PropertyReadUtil;
+import org.simple.rpc.starter.serialize.Serializer;
+import org.simple.rpc.starter.util.EnvironmentFieldReadUtil;
 
 import java.util.List;
 
@@ -36,7 +37,8 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         // 2. 1个字节的版本号
         out.writeByte(1);
         // 3. 1个字节的序列化方式： 0 ： jdk ， 1 ： JSON
-        int order = PropertyReadUtil.getSerializerAlgorithm().order();
+        Serializer.Algorithm serializerAlgorithm = EnvironmentFieldReadUtil.getSerializerAlgorithm();
+        int order = serializerAlgorithm.order();
         out.writeByte(order);
         // 4. 1个字节的指令类型
         out.writeByte(msg.getMessageType());
@@ -45,7 +47,7 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         // 1个字节对齐填充（无意义）
         out.writeByte(0xff);
         // 6. 序列化消息对象
-        byte[] bytes = PropertyReadUtil.getSerializerAlgorithm().serialize(msg);
+        byte[] bytes = serializerAlgorithm.serialize(msg);
         // 7. 4个字节消息长度
         out.writeInt(bytes.length);
         // 8. 写入内容到byteBuf中
@@ -84,23 +86,10 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         in.readBytes(bytes, 0, length);
 
         // 找到序列化算法
-        Serializer.Algorithm algorithm = null;
-        Serializer.Algorithm[] values = Serializer.Algorithm.values();
-        for (Serializer.Algorithm value : values) {
-            if (value.order() == serializerAlgorithm) {
-                algorithm = value;
-                break;
-            }
-        }
-        if (algorithm == null) {
-            throw new RuntimeException("无法找到反序列化算法，请检查算法order");
-        }
+        Serializer.Algorithm algorithm = Serializer.Algorithm.match(serializerAlgorithm);
         // 确定具体消息类型
         Class<? extends Message> messageClass = Message.getMessageClass(messageType);
         Message message = algorithm.deserialize(messageClass, bytes);
-
-//        log.debug("==========>>>>>>>> {}, {}, {}, {}, {}", magicNum, version, messageType, sequenceId, length);
-//        log.debug("{}", message);
 
         System.out.println("消息解码......end " + message);
         // 传递到下一个handler中（这里可以看到，传递到这个handler以后的消息就是经过解码的消息了，就不含消息长度、魔数等字段了）
