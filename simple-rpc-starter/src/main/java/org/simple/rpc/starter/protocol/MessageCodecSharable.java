@@ -53,7 +53,7 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         // 8. 写入内容到byteBuf中
         out.writeBytes(bytes);
 
-        System.out.println("消息编码码.....end " + msg);
+        log.info("出站消息编码结束, msg = {}", msg);
         // 写入到outList中，以保证传递到下一个handler（这里可以看到，传递到这个handler以后的消息就是经过解码的消息了，就不含消息长度、魔数等字段了）
         outList.add(out);
     }
@@ -91,7 +91,7 @@ public class MessageCodecSharable extends MessageToMessageCodec<ByteBuf, Message
         Class<? extends Message> messageClass = Message.getMessageClass(messageType);
         Message message = algorithm.deserialize(messageClass, bytes);
 
-        System.out.println("消息解码......end " + message);
+        log.info("入站消息解码结束, msg = {}", message);
         // 传递到下一个handler中（这里可以看到，传递到这个handler以后的消息就是经过解码的消息了，就不含消息长度、魔数等字段了）
         out.add(message);
     }

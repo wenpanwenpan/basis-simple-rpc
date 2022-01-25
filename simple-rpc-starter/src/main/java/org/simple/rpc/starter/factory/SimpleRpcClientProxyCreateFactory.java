@@ -79,7 +79,7 @@ public class SimpleRpcClientProxyCreateFactory {
                 // 那么这个promise在哪里接收的结果呢？当然是在响应handler里，因为只有当server端响应了promise才应该被设置值
                 RpcResponseMessageHandler.PROMISES.put(sequenceId, promise);
 
-                // todo 这里可以优化为异步等待的方式，提升channel性能
+                // todo 这里可以提供多种获取结果的方式（比如方法回调，同步等待），提升channel性能
                 /*promise.addListener(future -> {
                     // 线程
                 });*/

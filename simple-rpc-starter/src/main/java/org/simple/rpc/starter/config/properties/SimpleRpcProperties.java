@@ -37,6 +37,14 @@ public class SimpleRpcProperties {
      */
     private Nacos nacos = new Nacos();
 
+    /**
+     * RpcRequestMessageHandlerThreadPool线程池相关配置
+     */
+    private RpcRequestMessageHandlerThreadPool threadPool = new RpcRequestMessageHandlerThreadPool();
+
+    /**
+     * nacos相关配置
+     */
     public static class Nacos {
 
         /**
@@ -94,6 +102,72 @@ public class SimpleRpcProperties {
 
         public void setClusterName(String clusterName) {
             this.clusterName = clusterName;
+        }
+    }
+
+    /**
+     * RpcRequestMessageHandlerExecutor 线程池配置
+     */
+    public static class RpcRequestMessageHandlerThreadPool {
+        /**
+         * 核心线程数
+         */
+        private int corePoolSize = 5;
+        /**
+         * 最大线程数
+         */
+        private int maxPoolSize = 8;
+        /**
+         * 线程队列容量
+         */
+        private int queueCapacity = 1024;
+        /**
+         * 线程前缀
+         */
+        private String namePrefix = "simple-rpc-executor";
+        /**
+         * 空闲销毁时间
+         */
+        private int keepAliveSeconds = 600;
+
+        public int getCorePoolSize() {
+            return corePoolSize;
+        }
+
+        public void setCorePoolSize(int corePoolSize) {
+            this.corePoolSize = corePoolSize;
+        }
+
+        public int getMaxPoolSize() {
+            return maxPoolSize;
+        }
+
+        public void setMaxPoolSize(int maxPoolSize) {
+            this.maxPoolSize = maxPoolSize;
+        }
+
+        public int getQueueCapacity() {
+            return queueCapacity;
+        }
+
+        public void setQueueCapacity(int queueCapacity) {
+            this.queueCapacity = queueCapacity;
+        }
+
+        public String getNamePrefix() {
+            return namePrefix;
+        }
+
+        public void setNamePrefix(String namePrefix) {
+            this.namePrefix = namePrefix;
+        }
+
+        public int getKeepAliveSeconds() {
+            return keepAliveSeconds;
+        }
+
+        public void setKeepAliveSeconds(int keepAliveSeconds) {
+            this.keepAliveSeconds = keepAliveSeconds;
         }
     }
 

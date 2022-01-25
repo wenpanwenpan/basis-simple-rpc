@@ -15,6 +15,7 @@ import org.simple.rpc.starter.protocol.ProtocolFrameDecoder;
 import org.simple.rpc.starter.protocol.RpcRequestMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -55,8 +56,10 @@ public class SimpleRpcServerBootStrapListener implements ApplicationListener<Con
             LoggingHandler loggingHandler = new LoggingHandler(LogLevel.INFO);
             // 自定义协议解码器
             MessageCodecSharable messageCodecSharable = new MessageCodecSharable();
+            ApplicationContext applicationContext = event.getApplicationContext();
             // rpc消息请求处理器
-            RpcRequestMessageHandler rpcRequestMessageHandler = new RpcRequestMessageHandler(event.getApplicationContext());
+            RpcRequestMessageHandler rpcRequestMessageHandler = new RpcRequestMessageHandler(
+                    applicationContext, applicationContext.getBean(RpcRequestMessageHandlerExecutor.class));
 
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(boss, worker);

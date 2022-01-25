@@ -6,16 +6,17 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.simple.rpc.starter.constant.SimpleRpcConstants;
 import org.simple.rpc.starter.message.RpcRequestMessage;
 import org.simple.rpc.starter.message.RpcResponseMessage;
+import org.simple.rpc.starter.server.RpcRequestMessageHandlerExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * rpc请求处理器(入站handler)
@@ -47,15 +48,17 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
      */
     private static final Object METHOD_LOCK = new Object();
 
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     /**
      * rpcRequestMessage消息处理线程池
      */
-    private ThreadPoolExecutor threadPoolExecutor;
+    private RpcRequestMessageHandlerExecutor threadPoolExecutor;
 
-    public RpcRequestMessageHandler(ApplicationContext applicationContext) {
+    public RpcRequestMessageHandler(@NonNull ApplicationContext applicationContext,
+                                    @NonNull RpcRequestMessageHandlerExecutor threadPoolExecutor) {
         this.applicationContext = applicationContext;
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
     /**
@@ -67,33 +70,35 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequestMessage message) throws Exception {
-        // SequenceId保证响应消息的序列号和请求消息的序列号一致
-        RpcResponseMessage responseMessage = new RpcResponseMessage();
-        responseMessage.setSequenceId(message.getSequenceId());
+        // 利用线程池来提升消息rpc请求消息接收、处理性能
+        threadPoolExecutor.submit(() -> {
+            // SequenceId保证响应消息的序列号和请求消息的序列号一致
+            RpcResponseMessage responseMessage = new RpcResponseMessage();
+            responseMessage.setSequenceId(message.getSequenceId());
 
-        // todo 利用线程池来提升消息rpc请求消息接收、处理性能
-        try {
-            // 通过请求消息中的接口名称获取到容器中该接口的对应实现类
-            String interfaceName = message.getInterfaceName();
-            String methodName = message.getMethodName();
+            try {
+                // 通过请求消息中的接口名称获取到容器中该接口的对应实现类
+                String interfaceName = message.getInterfaceName();
+                String methodName = message.getMethodName();
 
-            // 获取到要调用的接口实现类对象 + 具体的方法（使用本地缓存提高反射效率）
-            Object targetBean = getTargetBean(interfaceName);
-            Method method = getTargetMethod(targetBean, interfaceName, methodName, message.getParameterTypes());
+                // 获取到要调用的接口实现类对象 + 具体的方法（使用本地缓存提高反射效率）
+                Object targetBean = getTargetBean(interfaceName);
+                Method method = getTargetMethod(targetBean, interfaceName, methodName, message.getParameterTypes());
 
-            // 反射调用接口实现类的指定方法
-            Object invoke = method.invoke(targetBean, message.getParameterValue());
+                // 反射调用接口实现类的指定方法
+                Object invoke = method.invoke(targetBean, message.getParameterValue());
 
-            // 调用成功
-            responseMessage.setReturnValue(invoke);
-        } catch (Exception ex) {
-            // 方法调用失败，返回异常调用
-            ex.printStackTrace();
-            responseMessage.setExceptionValue(ex);
-        }
+                // 调用成功
+                responseMessage.setReturnValue(invoke);
+            } catch (Exception ex) {
+                // 方法调用失败，返回异常调用
+                ex.printStackTrace();
+                responseMessage.setExceptionValue(ex);
+            }
 
-        // 执行结果写回给客户端
-        ctx.writeAndFlush(responseMessage);
+            // 执行结果写回给客户端
+            ctx.writeAndFlush(responseMessage);
+        });
     }
 
     /**

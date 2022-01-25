@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 消费方测试controller
@@ -33,9 +34,10 @@ public class ConsumerHelloController {
     }
 
     @GetMapping("/say-hello-1")
-    public ResponseEntity<String> sayHello1(String name) {
+    public ResponseEntity<String> sayHello1(String name) throws InterruptedException {
         // 这里像调用本地方法一样远程调用
         String str = helloSimpleRpcService.sayHello(name);
+        TimeUnit.SECONDS.sleep(10);
         System.out.println("sayHello1 rpc 调用返回 str = " + str);
         return ResponseEntity.ok(str);
     }

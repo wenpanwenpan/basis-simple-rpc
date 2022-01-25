@@ -5,10 +5,14 @@ import org.simple.rpc.starter.client.SimpleRpcClientReferencePostProcessor;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.config.properties.SpringParamsProperties;
 import org.simple.rpc.starter.nacos.NacosRegistrarManager;
+import org.simple.rpc.starter.server.RpcRequestMessageHandlerExecutor;
 import org.simple.rpc.starter.server.SimpleRpcServerBootStrapListener;
 import org.simple.rpc.starter.server.SimpleRpcServerExposeRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 开启simple rpc 自动配置类
@@ -52,5 +56,23 @@ public class EnableSimpleRpcAutoConfiguration {
     @Bean
     public SimpleRpcServerBootStrapListener simpleRpcServerBootStrapListener(SimpleRpcProperties simpleRpcProperties) {
         return new SimpleRpcServerBootStrapListener(simpleRpcProperties);
+    }
+
+    /**
+     * 注入RpcRequestMessageHandlerExecutor，用户可自定义线程池替换
+     */
+    @Bean
+    @ConditionalOnMissingBean(RpcRequestMessageHandlerExecutor.class)
+    public RpcRequestMessageHandlerExecutor rpcRequestMessageHandlerExecutor(SimpleRpcProperties simpleRpcProperties) {
+        RpcRequestMessageHandlerExecutor threadPoolTaskExecutor = new RpcRequestMessageHandlerExecutor();
+        threadPoolTaskExecutor.setMaxPoolSize(simpleRpcProperties.getThreadPool().getMaxPoolSize());
+        threadPoolTaskExecutor.setCorePoolSize(simpleRpcProperties.getThreadPool().getCorePoolSize());
+        threadPoolTaskExecutor.setQueueCapacity(simpleRpcProperties.getThreadPool().getQueueCapacity());
+        threadPoolTaskExecutor.setThreadNamePrefix(simpleRpcProperties.getThreadPool().getNamePrefix());
+        threadPoolTaskExecutor.setKeepAliveSeconds(simpleRpcProperties.getThreadPool().getKeepAliveSeconds());
+        threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 允许核心线程超时回收
+        threadPoolTaskExecutor.setAllowCoreThreadTimeOut(Boolean.TRUE);
+        return threadPoolTaskExecutor;
     }
 }
