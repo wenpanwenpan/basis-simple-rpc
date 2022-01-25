@@ -61,7 +61,6 @@ public class SimpleRpcServerExposeRunner implements CommandLineRunner {
 
         // 接口暴露到注册中心
         beansWithAnnotation.forEach((key, value) -> {
-            // 先假设这里只实现了一个接口
             Class<?>[] interfaces = value.getClass().getInterfaces();
             if (!Objects.isNull(interfaces)) {
                 // 将接口注册到nacos(以接口全限定名为服务名)

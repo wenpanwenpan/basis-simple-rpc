@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * simple rpc客户端后置处理器（为所有的标注了@SimpleRpcClientReference注解的类的属性设置值（动态代理对象））
- * https://www.jianshu.com/p/e0218c142d03
  *
  * @author Mr_wenpan@163.com 2022/01/24 12:45
  */
