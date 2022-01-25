@@ -10,14 +10,14 @@
 
 - 【`simple-rpc-like-feign`分支】实现了类似于openfeign调用相关功能（openFeign底层通信是基于HTTP，一般是使用HttpClient等相关HTTP客户端发起的调用（这也是openfeign比较低效的原因之一）。在`simple-rpc-like-feign`分支中将底层通信替换为了`netty`）。但在使用方式上和openfeign非常相似，使用上非常便捷。
 - 【`master`分支】实现了类似dubbo rpc相关功能（底层通信基于netty），使用上和dubbo比较类似。
-- 下面主要结束`master`分支实现的功能！！！
+- 下面主要介绍`master`分支实现的功能！！！
 
 
 
 ### ②、项目核心功能说明
 
 - 该项目实现了一个简单rpc调用，使用上类似于dubbo，非常方便，只需要基于一个`[注解 + 接口]`就能完成远程调用。
-  - 很多人认为feign是伪RPC，这有一定的道理，可参考：[https://www2.zhihu.com/question/298707085](https://www2.zhihu.com/question/298707085)
+  - 很多人认为feign是伪RPC，有一定的道理，可参考：[https://www2.zhihu.com/question/298707085](https://www2.zhihu.com/question/298707085)
 - 以nacos作为注册中心（后面可拓展为支持多种类型的注册中心）
 - 消息序列化算法可由使用方动态配置（目前支持Java、JSON两种序列化算法）
 - 底层基于netty实现【服务提供方】和【服务消费方】进行通信，并且使用自定义消息编码解码器（`MessageCodecSharable`和`ProtocolFrameDecoder`）解决消息粘包和半包问题
