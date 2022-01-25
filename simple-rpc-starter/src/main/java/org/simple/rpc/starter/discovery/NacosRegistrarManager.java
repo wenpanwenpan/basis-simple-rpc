@@ -132,6 +132,7 @@ public final class NacosRegistrarManager implements DisposableBean {
      */
     public Instance getRandomInstanceByServerName(@NonNull String serverName) throws NacosException {
         List<Instance> allInstances = getAllInstanceByServerName(serverName);
+        System.out.println("allInstances = " + allInstances);
         if (allInstances == null || allInstances.size() <= 0) {
             return null;
         }
