@@ -4,7 +4,7 @@ import com.alibaba.boot.nacos.discovery.properties.NacosDiscoveryProperties;
 import org.simple.rpc.starter.client.SimpleRpcClientReferencePostProcessor;
 import org.simple.rpc.starter.config.properties.SimpleRpcProperties;
 import org.simple.rpc.starter.config.properties.SpringParamsProperties;
-import org.simple.rpc.starter.nacos.NacosRegistrarManager;
+import org.simple.rpc.starter.discovery.NacosRegistrarManager;
 import org.simple.rpc.starter.server.RpcRequestMessageHandlerExecutor;
 import org.simple.rpc.starter.server.SimpleRpcServerBootStrapListener;
 import org.simple.rpc.starter.server.SimpleRpcServerExposeRunner;

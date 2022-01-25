@@ -1,4 +1,4 @@
-package org.simple.rpc.starter.nacos;
+package org.simple.rpc.starter.discovery;
 
 import com.alibaba.boot.nacos.discovery.properties.NacosDiscoveryProperties;
 import com.alibaba.nacos.api.NacosFactory;

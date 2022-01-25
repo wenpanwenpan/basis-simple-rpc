@@ -1,4 +1,4 @@
-package org.simple.rpc.starter.nacos.strategy;
+package org.simple.rpc.starter.discovery.strategy;
 
 /**
  * nacos获取provider负载均衡策略枚举
