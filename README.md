@@ -2,7 +2,27 @@
 
 ## 一、项目介绍
 
-### ①、项目基础介绍
+### ①、项目技术栈
+
+- JDK8、maven
+
+- netty底层通信原理
+
+- nacas注册中心、nacos客户端使用
+
+- 反射以及使用本地缓存优化反射效率
+
+- springboot自动配置、自定义starter、参数映射、自定义注解 + spring启动过程中注入自定义bean、spring容器事件监听、自定义starter基于注解实现动态插拔
+
+- 动态代理、枚举高级用法、定制序列化算法等
+
+- JUC相关知识，线程池，double check单例
+
+- JVM钩子函数运用
+
+  
+
+### ②、项目基础介绍
 
 【 simple-rpc】是一款简单的rpc服务框架，主要用于学习造轮子！以便于透彻的理解RPC原理和过程，以及`spring、springboot、netty`中相关技术运用。
 
@@ -14,7 +34,7 @@
 
 
 
-### ②、项目核心功能说明
+### ③、项目核心功能说明
 
 - 该项目实现了一个简单rpc调用，使用上类似于dubbo，非常方便，只需要基于一个`[注解 + 接口]`就能完成远程调用。
   - 很多人认为feign是伪RPC，有一定的道理，可参考：[https://www2.zhihu.com/question/298707085](https://www2.zhihu.com/question/298707085)
@@ -60,7 +80,13 @@
   - [通俗的解释一下什么是 RPC 框架](https://cloud.tencent.com/developer/article/1165885)
   - [feign调用原理浅析](https://www.jianshu.com/p/e0218c142d03)
 
+### ①、大致流程
+
 ![](images/rpc调用.png)
+
+### ②、时序图
+
+![](images/rpc时序图.jpg)
 
 
 
@@ -74,7 +100,7 @@
 
 
 
-## 五服务提供方和服务消费方启动流程简述
+## 五、服务提供方和服务消费方启动流程简述
 
 ### ①、服务提供方启动流程简述
 
