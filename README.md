@@ -1,5 +1,5 @@
 
-- 开发常用组件增强可参考：[https://gitee.com/mr_wenpan/basis-enhance](https://gitee.com/mr_wenpan/basis-enhance)
+**开发常用组件增强可参考** ：[https://gitee.com/mr_wenpan/basis-enhance](https://gitee.com/mr_wenpan/basis-enhance)
 
 ## 一、项目介绍
 
@@ -9,7 +9,7 @@
 
 - netty底层通信原理
 
-- nacas注册中心、nacos客户端使用
+- nacos注册中心、nacos客户端使用
 
 - 反射以及使用本地缓存优化反射效率
 
@@ -519,7 +519,7 @@ public class SimpleRpcServerBootStrapListener implements ApplicationListener<Con
 ## 七、待优化项
 
 - 目前只支持nacos作为注册中心
-- 多种负载均衡算法实现，目前只实现了一个随机轮询算法，后期扩展为支持一致性hash、带权轮询等
+- 多种负载均衡算法实现，目前只实现了一个随机轮询算法，后期扩展为支持一致性hash、加权随机、最少访问、带权轮询等
 - 服务实例和注册中心进行心跳检查时，如果不能正常通信需要及时清理本地缓存
 - 消息序列化可支持多种序列化算法动态配置（目前只支持java序列化和JSON序列化配置）
 - 程序启动时 netty server端的启动监听端口不需要配置文件指定，而是采用随机选取一个未使用的端口进行监听并注册到注册中心
